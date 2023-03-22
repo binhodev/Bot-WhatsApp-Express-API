@@ -4,6 +4,7 @@ const {
   createFlow,
   addKeyword,
 } = require("@bot-whatsapp/bot");
+require("dotenv").config();
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -16,6 +17,9 @@ const flowInitial = addKeyword("hi")
   .addAnswer("Welcome to be assistant 🤖.", { delay: 1200 });
 
 const app = express();
+const { expressjwt: jwt } = require("express-jwt");
+const jwksRsa = require("jwks-rsa");
+
 const main = async () => {
   const adapterDB = new JsonFileAdapter();
   const adapterFlow = createFlow([flowInitial]);
@@ -27,7 +31,28 @@ const main = async () => {
     database: adapterDB,
   });
 
+  const checkJWT = jwt({
+    secret: jwksRsa.expressJwtSecret({
+      cache: true,
+      rateLimit: true,
+      jwksRequestsPerMinute: 5,
+      jwksUri: process.env.AUTH0_JWKS_URI,
+    }),
+
+    audience: process.env.AUTH0_AUDIENCE,
+    issuer: process.env.AUTH0_ISSUER,
+    algorithms: ["RS256"],
+  });
+
   app.use(bodyParser.json());
+
+  app.use(checkJWT);
+
+  app.use(function (err, req, res, next) {
+    if (err.name === "UnauthorizedError") {
+      res.status(401).send("Invalid token!");
+    }
+  });
 
   app.post("/sendmessage", async (req, res) => {
     const phone = req.body.phone;
