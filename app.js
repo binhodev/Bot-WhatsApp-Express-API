@@ -1,10 +1,14 @@
+if (process.env.NODE_ENV !== "PROD") {
+  require("dotenv").config();
+}
+
 const {
   createBot,
   createProvider,
   createFlow,
   addKeyword,
+  EVENTS,
 } = require("@bot-whatsapp/bot");
-require("dotenv").config();
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -12,7 +16,7 @@ const QRPortalWeb = require("@bot-whatsapp/portal");
 const BaileysProvider = require("@bot-whatsapp/provider/baileys");
 const JsonFileAdapter = require("@bot-whatsapp/database/json");
 
-const flowInitial = addKeyword("hi")
+const flowInitial = addKeyword(EVENTS.WELCOME)
   .addAnswer("Hello 👋!!")
   .addAnswer("Welcome to be assistant 🤖.", { delay: 1200 });
 
@@ -45,6 +49,9 @@ const main = async () => {
   });
 
   app.use(bodyParser.json());
+  app.set("view engine", "ejs");
+  app.set("views", "views");
+  app.use(express.static("views"));
 
   app.use(checkJWT);
 
@@ -54,7 +61,11 @@ const main = async () => {
     }
   });
 
-  app.post("/sendmessage", async (req, res) => {
+  app.get("/qrcode", async (req, res) => {
+    res.render("qrcode");
+  });
+
+  app.post("/sendmessage", checkJWT, async (req, res) => {
     const phone = req.body.phone;
     const message = req.body.message;
     const provider = await adapterProvider.getInstance();
