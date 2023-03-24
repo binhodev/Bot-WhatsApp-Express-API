@@ -10,8 +10,6 @@ const {
   EVENTS,
 } = require("@bot-whatsapp/bot");
 
-const fs = require("fs");
-
 const express = require("express");
 const bodyParser = require("body-parser");
 const QRPortalWeb = require("@bot-whatsapp/portal");
@@ -25,7 +23,6 @@ const flowInitial = addKeyword(EVENTS.WELCOME)
 const app = express();
 const { expressjwt: jwt } = require("express-jwt");
 const jwksRsa = require("jwks-rsa");
-const { copyQrCodeFile } = require("./utils");
 
 const main = async () => {
   const adapterDB = new JsonFileAdapter();
