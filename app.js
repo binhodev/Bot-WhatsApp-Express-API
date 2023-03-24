@@ -57,7 +57,7 @@ const main = async () => {
   app.set("views", "views");
   app.use(express.static("views"));
 
-  app.use(checkJWT);
+//   app.use(checkJWT);
 
   app.use(function (err, req, res, next) {
     if (err.name === "UnauthorizedError") {
