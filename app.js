@@ -10,6 +10,8 @@ const {
   EVENTS,
 } = require("@bot-whatsapp/bot");
 
+const fs = require("fs");
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const QRPortalWeb = require("@bot-whatsapp/portal");
@@ -23,11 +25,13 @@ const flowInitial = addKeyword(EVENTS.WELCOME)
 const app = express();
 const { expressjwt: jwt } = require("express-jwt");
 const jwksRsa = require("jwks-rsa");
+const { baileyGenerateImage, copyQrCodeFile } = require("./utils");
 
 const main = async () => {
   const adapterDB = new JsonFileAdapter();
   const adapterFlow = createFlow([flowInitial]);
   const adapterProvider = createProvider(BaileysProvider);
+  const botFileName = await adapterProvider.globalVendorArgs.name;
 
   createBot({
     flow: adapterFlow,
@@ -69,7 +73,7 @@ const main = async () => {
     res.render("qrcode");
   });
 
-  app.post("/sendmessage", checkJWT, async (req, res) => {
+  app.post("/sendmessage", async (req, res) => {
     const phone = req.body.phone;
     const message = req.body.message;
     const provider = await adapterProvider.getInstance();
@@ -86,6 +90,7 @@ const main = async () => {
   });
 
   QRPortalWeb();
+  copyQrCodeFile(botFileName);
 };
 
 main();
