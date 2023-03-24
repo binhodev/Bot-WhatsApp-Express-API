@@ -61,6 +61,10 @@ const main = async () => {
     }
   });
 
+  app.get("/", async (req, res) => {
+    res.send("Ok!");
+  });
+
   app.get("/qrcode", async (req, res) => {
     res.render("qrcode");
   });
