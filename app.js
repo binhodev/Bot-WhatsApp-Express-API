@@ -25,13 +25,12 @@ const flowInitial = addKeyword(EVENTS.WELCOME)
 const app = express();
 const { expressjwt: jwt } = require("express-jwt");
 const jwksRsa = require("jwks-rsa");
-const { baileyGenerateImage, copyQrCodeFile } = require("./utils");
+const { copyQrCodeFile } = require("./utils");
 
 const main = async () => {
   const adapterDB = new JsonFileAdapter();
   const adapterFlow = createFlow([flowInitial]);
   const adapterProvider = createProvider(BaileysProvider);
-  const botFileName = await adapterProvider.globalVendorArgs.name;
 
   createBot({
     flow: adapterFlow,
@@ -57,7 +56,7 @@ const main = async () => {
   app.set("views", "views");
   app.use(express.static("views"));
 
-  //   app.use(checkJWT);
+  app.use(checkJWT);
 
   app.use(function (err, req, res, next) {
     if (err.name === "UnauthorizedError") {
@@ -90,7 +89,6 @@ const main = async () => {
   });
 
   QRPortalWeb();
-  copyQrCodeFile(botFileName);
 };
 
 main();
